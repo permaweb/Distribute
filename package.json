@@ -1,0 +1,14 @@
+{
+  "name": "Distribute",
+  "version": "1.0.0",
+  "main": "index.js",
+  "repository": "https://github.com/permaweb/Distribute.git",
+  "author": "Tom Wilson <tom@hyper.io>",
+  "license": "MIT",
+  "dependencies": {
+    "warp-contracts": "^1.4.9"
+  },
+  "scripts": {
+    "start": "node run.js"
+  }
+}
