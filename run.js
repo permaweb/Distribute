@@ -1,5 +1,6 @@
 import fs from 'fs'
 import { WarpFactory, LoggerFactory } from 'warp-contracts'
+import cliProgress from 'cli-progress'
 
 LoggerFactory.INST.logLevel('error')
 const warp = WarpFactory.forMainnet()
@@ -10,8 +11,10 @@ const SHARE = Math.floor(TOTAL / ids.length)
 const jwk = JSON.parse(fs.readFileSync('./wallet.json', 'utf-8'))
 
 async function main() {
+  const bar1 = new cliProgress.SingleBar({}, cliProgress.Presets.shades_classic);
+
   const contract = await warp
-    .contract('CGaAQAw1mtKiIAGIwh4bmmZOsgcEGCo6hzWgV6Ua42c')
+    .contract('8-i3lqKG7UJhzSQE0nxxg-V1dwgvW4vxoGJGiZCNpBs')
     .connect(jwk)
     .setEvaluationOptions({
       allowBigInt: true,
@@ -26,11 +29,14 @@ async function main() {
       return payload.cachedValue.state.balances
     })
 
+  bar1.start(addrs.length, 0);
   for (var i = 0; i < addrs.length; i++) {
     if ((balances[addrs[i]] || 0) < SHARE) {
       await transfer(contract, addrs[i], SHARE)
     }
+    bar1.update(i)
   }
+  bar1.stop()
 }
 
 main()
@@ -40,7 +46,6 @@ async function transfer(contract, target, qty) {
 
   await new Promise(r => setTimeout(r, 25))
 
-  console.log('target: ', target)
   return contract.writeInteraction({
     function: 'transfer',
     target,
