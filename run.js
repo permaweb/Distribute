@@ -30,6 +30,7 @@ async function main() {
       allowBigInt: true,
       internalWrites: true,
       remoteStateSyncEnabled: true,
+      //remoteStateSyncSource: 'dre-4.warp.cc',
       unsafeClient: 'skip'
     })
 
@@ -54,13 +55,11 @@ main()
 async function transfer(contract, target, qty) {
   if (target === '') { return }
 
-  await new Promise(r => setTimeout(r, 25))
+  //await new Promise(r => setTimeout(r, 25))
 
   return contract.writeInteraction({
     function: 'transfer',
     target,
     qty
-  }, {
-    strict: true
   })
 }
