@@ -1,66 +1,92 @@
-import fs from 'fs'
-import { WarpFactory, LoggerFactory } from 'warp-contracts'
-import Arweave from 'arweave'
-import cliProgress from 'cli-progress'
+import fs from 'fs';
+import { WarpFactory, LoggerFactory } from 'warp-contracts';
+import cliProgress from 'cli-progress';
+import { toPairs } from 'ramda';
 
-const arweave = Arweave.init({ host: 'arweave.net', port: 443, protocol: 'https' })
-LoggerFactory.INST.logLevel('error')
-const REBAR = 'LL2_TB0RUgZnKP6QZ2M1kiUz0joKEHuGHXiXQYVhRsM'
+LoggerFactory.INST.logLevel('error');
+const REBAR = '1ZSr_UCTVfzdDdjsVY0OTScMlbDSKq7F93CRh9jKFwI'; // TODO: update with latest contract after source updates
 
-const warp = WarpFactory.forMainnet()
-const ids = fs.readFileSync('./ids.txt', 'utf-8').split('\n')
-const futureBalances = JSON.parse(fs.readFileSync('./state.json', 'utf-8')).balances
-const walletFile = process.argv[2]
-if (!walletFile) { throw new Error('keyfile is required!') }
-const jwk = JSON.parse(fs.readFileSync(walletFile, 'utf-8'))
+const warp = WarpFactory.forMainnet();
+const ids = toPairs(JSON.parse(fs.readFileSync('./ids.json', 'utf-8'))).map(
+  (p) => p[0]
+);
+const futureBalances = JSON.parse(fs.readFileSync('./future.json', 'utf-8'));
+
+const jwk1 = JSON.parse(fs.readFileSync(process.env.NODE_1_WALLET).toString());
+const jwk2 = JSON.parse(fs.readFileSync(process.env.NODE_2_WALLET).toString());
 
 async function main() {
-  const address = await arweave.wallets.getAddress(jwk)
-  const TOTAL = await fetch('https://dre-4.warp.cc/contract?id=' + REBAR)
-    .then(res => res.json())
-    .then(result => result.state?.balances[address] || 0)
+  const TOTAL = 5077996522; // divided by 199 25517570
+  const node1 = 3401435542; // 133 - 3392601373 (remainder: 7556220)
+  const node1Remander = 7598732;
+  const node2 = 1676560980; // 65 - 1658038265 = 5050639638 (diff/remainder: 25508313)
+  const node2hotFix = 17918838;
 
-  const SHARE = Math.floor(TOTAL / ids.length)
+  const SHARE = Math.floor(TOTAL / ids.length);
 
-  const bar1 = new cliProgress.SingleBar({}, cliProgress.Presets.shades_classic);
+  const bar1 = new cliProgress.SingleBar(
+    {},
+    cliProgress.Presets.shades_classic
+  );
 
-  const contract = await warp
+  const contract1 = await warp
     .contract(REBAR)
-    .connect(jwk)
+    .connect(jwk1)
     .setEvaluationOptions({
       allowBigInt: true,
       internalWrites: true,
       remoteStateSyncEnabled: true,
       //remoteStateSyncSource: 'https://dre-4.warp.cc/contract',
-      unsafeClient: 'skip'
-    })
+      unsafeClient: 'skip',
+    });
 
-  const addrs = ids
-  const balances = await contract.readState()
-    .then(payload => {
-      return payload.cachedValue.state.balances
-    })
+  const contract2 = await warp
+    .contract(REBAR)
+    .connect(jwk2)
+    .setEvaluationOptions({
+      allowBigInt: true,
+      internalWrites: true,
+      remoteStateSyncEnabled: true,
+      //remoteStateSyncSource: 'https://dre-4.warp.cc/contract',
+      unsafeClient: 'skip',
+    });
+
+  const addrs = ids;
+  const balances = await contract1.readState().then((payload) => {
+    return payload.cachedValue.state.balances;
+  });
 
   bar1.start(addrs.length, 0);
   for (var i = 0; i < addrs.length; i++) {
     if ((balances[addrs[i]] || 0) < futureBalances[addrs[i]]) {
-      await transfer(contract, addrs[i], SHARE)
+      if (i < 133) {
+        await transfer(contract1, addrs[i], SHARE);
+      }
+      if (i === 133) {
+        await transfer(contract1, addrs[i], node1Remander);
+        await transfer(contract2, addrs[i], node2hotFix);
+      }
+      if (i > 133) {
+        await transfer(contract2, addrs[i], SHARE);
+      }
     }
-    bar1.update(i)
+    bar1.update(i);
   }
-  bar1.stop()
+  bar1.stop();
 }
 
-main()
+main();
 
 async function transfer(contract, target, qty) {
-  if (target === '') { return }
+  if (target === '') {
+    return;
+  }
 
   //await new Promise(r => setTimeout(r, 25))
 
   return contract.writeInteraction({
     function: 'transfer',
     target,
-    qty
-  })
+    qty,
+  });
 }
