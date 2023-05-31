@@ -31,7 +31,7 @@ async function main() {
       allowBigInt: true,
       internalWrites: true,
       remoteStateSyncEnabled: true,
-      //remoteStateSyncSource: 'dre-4.warp.cc',
+      //remoteStateSyncSource: 'https://dre-4.warp.cc/contract',
       unsafeClient: 'skip'
     })
 
