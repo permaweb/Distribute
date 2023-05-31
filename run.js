@@ -1,20 +1,28 @@
 import fs from 'fs'
 import { WarpFactory, LoggerFactory } from 'warp-contracts'
+import Arweave from 'arweave'
 import cliProgress from 'cli-progress'
 
+const arweave = Arweave.init({ host: 'arweave.net', port: 443, protocol: 'https' })
 LoggerFactory.INST.logLevel('error')
+const REBAR = 'LL2_TB0RUgZnKP6QZ2M1kiUz0joKEHuGHXiXQYVhRsM'
+
 const warp = WarpFactory.forMainnet()
 const ids = fs.readFileSync('./ids.txt', 'utf-8').split('\n')
-
-const TOTAL = 1657263496
-const SHARE = Math.floor(TOTAL / ids.length)
 const jwk = JSON.parse(fs.readFileSync('./wallet.json', 'utf-8'))
 
 async function main() {
+  const address = await arweave.wallets.getAddress(jwk)
+  const TOTAL = await fetch('https://dre-4.warp.cc/contract?id=' + REBAR)
+    .then(res => res.json())
+    .then(result => result.state?.balances[address] || 0)
+
+  const SHARE = Math.floor(TOTAL / ids.length)
+
   const bar1 = new cliProgress.SingleBar({}, cliProgress.Presets.shades_classic);
 
   const contract = await warp
-    .contract('8-i3lqKG7UJhzSQE0nxxg-V1dwgvW4vxoGJGiZCNpBs')
+    .contract(REBAR)
     .connect(jwk)
     .setEvaluationOptions({
       allowBigInt: true,
