@@ -9,6 +9,7 @@ const REBAR = 'LL2_TB0RUgZnKP6QZ2M1kiUz0joKEHuGHXiXQYVhRsM'
 
 const warp = WarpFactory.forMainnet()
 const ids = fs.readFileSync('./ids.txt', 'utf-8').split('\n')
+const futureBalances = JSON.parse(fs.readFileSync('./state.json', 'utf-8')).balances
 const walletFile = process.argv[2]
 if (!walletFile) { throw new Error('keyfile is required!') }
 const jwk = JSON.parse(fs.readFileSync(walletFile, 'utf-8'))
@@ -42,7 +43,7 @@ async function main() {
 
   bar1.start(addrs.length, 0);
   for (var i = 0; i < addrs.length; i++) {
-    if ((balances[addrs[i]] || 0) < SHARE) {
+    if ((balances[addrs[i]] || 0) < futureBalances[addrs[i]]) {
       await transfer(contract, addrs[i], SHARE)
     }
     bar1.update(i)
