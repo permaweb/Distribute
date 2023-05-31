@@ -4,7 +4,7 @@ import cliProgress from 'cli-progress';
 import { toPairs } from 'ramda';
 
 LoggerFactory.INST.logLevel('error');
-const REBAR = 'IaF1QpB_vwUuC4mxiAuEx3N5QlI6I0IRQaRSFp2tv44'; // TODO: update with latest contract after source updates
+const REBAR = '1ZSr_UCTVfzdDdjsVY0OTScMlbDSKq7F93CRh9jKFwI'; // TODO: update with latest contract after source updates
 
 const warp = WarpFactory.forMainnet();
 const ids = toPairs(JSON.parse(fs.readFileSync('./ids.json', 'utf-8'))).map(
@@ -16,11 +16,11 @@ const jwk1 = JSON.parse(fs.readFileSync(process.env.NODE_1_WALLET).toString());
 const jwk2 = JSON.parse(fs.readFileSync(process.env.NODE_2_WALLET).toString());
 
 async function main() {
-  const TOTAL = 5076147951;
-  const node1 = 3400157593; // 133 - 3392601373 (remainder: 7556220)
-  const node1Remander = 7556220;
-  const node2 = 1675990358; // 65 - 1658038265 = 5050639638 (diff/remainder: 25508313)
-  const node2hotFix = 17952061;
+  const TOTAL = 5077996522; // divided by 199 25517570
+  const node1 = 3401435542; // 133 - 3392601373 (remainder: 7556220)
+  const node1Remander = 7598732;
+  const node2 = 1676560980; // 65 - 1658038265 = 5050639638 (diff/remainder: 25508313)
+  const node2hotFix = 17918838;
 
   const SHARE = Math.floor(TOTAL / ids.length);
 
