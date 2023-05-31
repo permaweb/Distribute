@@ -9,7 +9,9 @@ const REBAR = 'LL2_TB0RUgZnKP6QZ2M1kiUz0joKEHuGHXiXQYVhRsM'
 
 const warp = WarpFactory.forMainnet()
 const ids = fs.readFileSync('./ids.txt', 'utf-8').split('\n')
-const jwk = JSON.parse(fs.readFileSync('./wallet.json', 'utf-8'))
+const walletFile = process.argv[2]
+if (!walletFile) { throw new Error('keyfile is required!') }
+const jwk = JSON.parse(fs.readFileSync(walletFile, 'utf-8'))
 
 async function main() {
   const address = await arweave.wallets.getAddress(jwk)
