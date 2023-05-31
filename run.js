@@ -4,7 +4,7 @@ import cliProgress from 'cli-progress';
 import { toPairs } from 'ramda';
 
 LoggerFactory.INST.logLevel('error');
-const REBAR = '1ZSr_UCTVfzdDdjsVY0OTScMlbDSKq7F93CRh9jKFwI'; // TODO: update with latest contract after source updates
+const REBAR = 'vPaIJgl6bLf8V2Wy7aGbsPoUL3RkQ0srr0ChEm8wxvs';
 
 const warp = WarpFactory.forMainnet();
 const ids = toPairs(JSON.parse(fs.readFileSync('./ids.json', 'utf-8'))).map(
