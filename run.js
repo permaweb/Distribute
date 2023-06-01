@@ -4,7 +4,7 @@ import cliProgress from 'cli-progress';
 import { toPairs } from 'ramda';
 
 LoggerFactory.INST.logLevel('error');
-const REBAR = 'vPaIJgl6bLf8V2Wy7aGbsPoUL3RkQ0srr0ChEm8wxvs';
+const REBAR = 'rO8f4nTVarU6OtU2284C8-BIH6HscNd-srhWznUllTk';
 
 const warp = WarpFactory.forMainnet();
 const ids = toPairs(JSON.parse(fs.readFileSync('./ids.json', 'utf-8'))).map(
